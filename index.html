@@ -1,0 +1,66 @@
+<html>
+	<head>
+		<script src="./libs/script/jquery.min.js"></script>
+		<script src="./libs/script/mustache.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="./libs/css/datatables.min.css"/>		 
+		<script type="text/javascript" src="./libs/script/datatables.min.js"></script>
+	</head>
+	<body>
+        <div id="uploadCSV">
+                <input type="file" id="fileUpload" />
+                <input type="button" id="upload" value="Upload" onclick="Upload()" />
+        </div>
+        <div id="profile-action-handler">
+
+        </div>
+		<script>
+            function loadTable(){
+                var template = $('#profileTable').html();
+                var html = Mustache.to_html(template, window.table);
+                $('#profile-action-handler').html(html);
+                $('#profileshandler').DataTable();
+            }
+
+            function Upload() {
+                var fileUpload = document.getElementById("fileUpload");
+                var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.csv|.txt)$/;
+                if (regex.test(fileUpload.value.toLowerCase())) {
+                    if (typeof (FileReader) != "undefined") {
+                        var reader = new FileReader();
+                        reader.onload = function (e) {
+                            var table = {};
+                            var rows = e.target.result.split("\n");
+
+                            if(rows.length > 0){
+                                table.profiles = rows[0].split(',');
+                                table.profiles.shift();
+                                table.fields = [];
+                                table.data = [];
+                                rows.shift();
+                                for (var i = 0; i < rows.length; i++) {
+                                    var cells = rows[i].split(",");
+                                    if(cells.length > 0){
+                                        table.fields.push(cells[0]);
+                                        cells.shift();
+                                        table.data.push(cells);
+                                    }
+                                }
+                            }
+                            window.table = table;
+                            $('#uploadCSV').hide();
+                        }
+                        reader.readAsText(fileUpload.files[0]);
+                    } else {
+                        alert("This browser does not support HTML5.");
+                    }
+                } else {
+                    alert("Please upload a valid CSV file.");
+                }
+            }
+        </script>
+        
+        <script id="profileTable" type="text/template">
+            <table id="profileshandler" class="display" style="width:100%"><thead><tr><th>&darr; Field Name \ Profiles &rarr;</th>{{#profiles.length}}{{#profiles}}<th>{{.}}</th>{{/profiles}}{{/profiles.length}}</tr></thead><tbody>{{#fields.length}}{{#fields}}<tr class="{{.}}"> <td>{{.}}</td>{{#profiles}}<td class="{{.}}"> <select size="1"> <option value="0"> --None-- </option> <option value="1"> Read Only </option> <option value="2"> Read and Write </option> </select> </td>{{/profiles}}</tr>{{/fields}}{{/fields.length}}</tbody><tfoot><tr><th>&uarr; Field Name \ Profiles &rarr;</th>{{#profiles.length}}{{#profiles}}<th>{{.}}</th>{{/profiles}}{{/profiles.length}}</tr></tfoot></table>
+        </script>
+	</body>
+</html>
