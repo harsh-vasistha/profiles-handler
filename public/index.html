@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>SFDC FLS</title>
+	<link rel="stylesheet" type="text/css" href="./stylesheets/bootstrap.min.css" />
+	<link rel="stylesheet" type="text/css" href="./stylesheets/custom.css" />
+
+	<script type="text/javascript" src="./javascripts/jquery.min.js"></script>
+	<script type="text/javascript" src="./javascripts/mustache.min.js"></script>
+	<script type="text/javascript" src="./javascripts/bootstrap.min.js"></script>
+
+	<script type="text/javascript" src="./javascripts/custom.js"></script>
+	<script type="text/javascript" src="./javascripts/pagination.js"></script>
+	<script type="text/javascript" src="./javascripts/read_csv.js"></script>
+	<script type="text/javascript" src="./javascripts/bulk_permission_update.js"></script>
+	<script type="text/javascript" src="./javascripts/download_profile.js"></script>
+	<script type="text/javascript" src="./javascripts/sfdc_connection.js"></script>
+	
+</head>
+
+<body>
+	<div class="container mt-4">
+		<div class="row">
+			<div class="col page-header text-center">
+				<h2>Field Level Security for Salesforce</h2>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col text-center">
+				<p>Either upload a CSV with field and profiles or Login to salesforce org to retrive the profile.</p>
+			</div>
+		</div>
+		<!--Table content start-->
+		<!--Filter header start-->
+		<div class="row border" id="profile-action-filter-action">
+			<div class="col mt-4 mb-4 text-left" id="profile-action-handler-rows">
+				<select size="1" onchange="change_row_count(this)" class="custom-select custom-select-sm mb-3" style="width:125px;">
+					<option value="10"> 10 </option>
+					<option value="20"> 20 </option>
+					<option value="50"> 50 </option>
+					<option value="100"> 100 </option>
+					<option value="200"> 200 </option>
+					<option value="500"> 500 </option>
+					<option value="100"> 1000 </option>
+				</select>
+			</div>
+			<div class="col mt-4 mb-4 text-center">
+				<select size="1" id="bulk_permission_update" onchange="update_bulk_permission(this);" class="custom-select custom-select-sm mb-3" style="width:125px;">
+					<option value="0"> --None-- </option>
+					<option value="1"> Read Only </option>
+					<option value="2"> Read and Write </option>
+				</select>
+			</div>
+			<div class="col mt-4 mb-4 text-center">
+				<button type="button" class="btn btn-primary" onclick="download_csv()">Download CSV</button>
+			</div>
+			<div class="col mt-4 mb-4 text-right" id="profile-action-handler-search">
+				<div class="input-group mb-3">
+					<input type="text" class="form-control" placeholder="Search" aria-label="Search" aria-describedby="basic-addon1">
+				</div>
+			</div>
+		</div>
+		<!--Filter header End-->
+		<!--Table start-->
+		<div class="row border" id="profile-action-row">
+			<div class="col mt-4 mb-4" id="profile-action-handler">
+				<!--Here goes the table code-->
+			</div>
+		</div>
+		<!--Table end-->
+		<!--Pagination start-->
+		<div class="row float-right" id="profile-action-pagination">
+			<div>
+				<ul class="pagination">
+					<!--Pagination code goes here-->
+				</ul>
+			</div>
+		</div>
+		<!--Pagination End-->
+		<!--Table content End-->
+		<div class="row border" id="file-handler">
+			<!--CSV Reader Component start-->
+			<div class="col mb-2">
+				<form>
+					<h3 class="mt-2">Upload CSV File to process</h3>
+					<div class="input-group mb-3">
+						<div class="custom-file">
+							<input type="file" id="fileUpload" class="custom-file-input" aria-describedby="inputGroupFileAddon01">
+							<label class="custom-file-label" for="fileUpload">Choose CSV file</label>
+						</div>
+					</div>
+					<div class="input-group mb-3 mt-3">
+						<button class="btn btn-primary text-center" id="upload" onclick="Upload();">Process</button>
+						<img class="ml-4" src="./images/loader.gif" alt="Processing..." id="loader" height="30" style="display: none;" />
+					</div>
+				</form>
+			</div>
+			<!--CSV Reader Component end-->
+			<!--Salesforce login component start-->
+			<div class="col  mb-4">
+				<form>
+					<h3 class="mt-2">Login to salesforce to process</h3>
+					<div class="form-group">
+						<label for="username">Username</label>
+						<input type="email" class="form-control" id="username" aria-describedby="emailHelp" placeholder="Enter email">
+						<!--<small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>-->
+					</div>
+					<div class="form-group">
+						<label for="password">Password</label>
+						<input type="password" class="form-control required" id="password" placeholder="Password">
+					</div>
+					<div class="form-group">
+						<label for="securityToken">Security Token</label>
+						<input type="password" class="form-control" id="securityToken" placeholder="Security Token">
+					</div>
+					<div class="checkbox">
+						<label><input type="checkbox" id="is_production"> Production Login</label>
+					  </div>
+					<button type="button" class="btn btn-primary" onclick="login()">Submit</button>
+				</form>
+			</div>
+			<!--Salesforce login component end-->
+		</div>
+	</div>
+	<script id="profileTable" type="text/template">
+		<table id="profileshandler" class="display table pagination-table" style="width:100%"> <thead> <tr> <th>&darr; Field Name \ Profiles &rarr;</th>{{#profiles.length}}{{#profiles}}<th class="text-center profile" onclick="select_th_component(this)">{{.}}</th>{{/profiles}}{{/profiles.length}}</tr></thead> <tbody>{{#fields.length}}{{#fields}}<tr class="{{.}}" field="{{.}}"> <td class="text-center field" onclick="select_td_component(this)">{{.}}</td>{{#profiles}}<td style="text-align:center;vertical-align:middle;" class="{{.}}" onclick="select_td_component(this)"> <select size="1" class="custom-select custom-select-sm mb-3" style="width:125px;"> <option value="0"> --None-- </option> <option value="1"> Read Only </option> <option value="2"> Read and Write </option> </select> </td>{{/profiles}}</tr>{{/fields}}{{/fields.length}}</tbody> <tfoot> <tr> <th>&uarr; Field Name \ Profiles &rarr;</th>{{#profiles.length}}{{#profiles}}<th class="text-center"><input type="button" value="Download" onclick="createProfile('{{.}}')"/></th>{{/profiles}}{{/profiles.length}}</tr></tfoot></table>
+	</script>
+</body>
+
+</html>
