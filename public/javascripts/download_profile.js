@@ -36,7 +36,7 @@ function createProfile(profile) {
         var field = fields[i];
         var data = parseInt($('.' + field + ' .' + profile + ' select').children("option:selected").val().trim());
         console.log(field);
-        console.log(profile);
+        field = field.split('-').join('.');
         profilePermission += permissionStart;
         profilePermission += fieldStart + field + fieldEnd;
         if (data == 0) {
@@ -46,8 +46,6 @@ function createProfile(profile) {
         } else if (data == 2) {
             profilePermission += readWritePermission;
         }
-
-
         profilePermission += permissionEnds;
     }
     profilePermission += ending;
@@ -57,6 +55,6 @@ function createProfile(profile) {
 
     hiddenElement.href = 'data:attachment/text,' + encodeURI(window.profilePermissions[profile]);
     hiddenElement.target = '_blank';
-    hiddenElement.download = profile + '.profile';
+    hiddenElement.download = profile.split('_').join(' ').split('-').join(':') + '.profile';
     hiddenElement.click();
 }

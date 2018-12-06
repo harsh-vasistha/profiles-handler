@@ -15,6 +15,7 @@ function login() {
                     if(data.login['sf:exceptionMessage'] != null){
                         alert(data.login['sf:exceptionCode']+ ' || ' + data.login['sf:exceptionMessage']);
                     }else{
+                        isFromOrg = true;
                         window.sfdc_server = data.login;
                         alert('Hello '+data.login.userFullName+', SFDC Login successful. Please press "Ok" to retrive FLS permissions')
                         load_fls_permissions();
@@ -36,16 +37,18 @@ function load_fls_permissions(){
             var fieldValues = {};
             var profileValues = {};
             var profileName = '';
+            var fieldName = '';
             response = JSON.parse(response);
             for(var i in response.records){
-                if(!data.hasOwnProperty(response.records[i].Field)){
-                    data[response.records[i].Field] = {};
+                fieldName = response.records[i].Field.split('.').join('-');
+                if(!data.hasOwnProperty(fieldName)){
+                    data[fieldName] = {};
                 }
                 count = response.records[i].PermissionsEdit ? '2' : response.records[i].PermissionsRead ? '1' : '0';
                 profileName = response.records[i].Parent.Profile.Name.trim().split(' ').join('_').split(':').join('-');
-                fieldValues[response.records[i].Field] = '';
+                fieldValues[fieldName] = '';
                 profileValues[profileName] = '';
-                data[response.records[i].Field][profileName] = count;
+                data[fieldName][profileName] = count;
             }
             fields = Object.keys(fieldValues);
             profiles = Object.keys(profileValues);

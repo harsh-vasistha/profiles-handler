@@ -1,6 +1,7 @@
 var fields = [];
 var profiles = [];
 var data = {};
+var isFromOrg = false;
 
 function Upload() {
     var fileUpload = document.getElementById("fileUpload");
