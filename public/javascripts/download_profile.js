@@ -7,6 +7,7 @@ var permissionEnds = '\n\t</fieldPermissions>\n\t';
 var ending = '</Profile>';
 var fieldStart = '\n\t\t<field>'
 var fieldEnd = '</field>';
+window.profilePermissions = {}
 
 function download_csv() {
     var csv = 'Fields,' + profiles.join(',') + '\n';
