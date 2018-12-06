@@ -38,14 +38,14 @@ function load_fls_permissions(){
             var profileName = '';
             response = JSON.parse(response);
             for(var i in response.records){
-                if(!data.hasOwnProperty(response.records[i].SobjectType)){
-                    data[response.records[i].SobjectType] = {};
+                if(!data.hasOwnProperty(response.records[i].Field)){
+                    data[response.records[i].Field] = {};
                 }
                 count = response.records[i].PermissionsEdit ? '2' : response.records[i].PermissionsRead ? '1' : '0';
                 profileName = response.records[i].Parent.Profile.Name.trim().split(' ').join('_').split(':').join('-');
-                fieldValues[response.records[i].SobjectType] = '';
+                fieldValues[response.records[i].Field] = '';
                 profileValues[profileName] = '';
-                data[response.records[i].SobjectType][profileName] = count;
+                data[response.records[i].Field][profileName] = count;
             }
             fields = Object.keys(fieldValues);
             profiles = Object.keys(profileValues);
